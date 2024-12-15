@@ -1,9 +1,18 @@
+import logging
 import sys
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
 import ffmpeg
+
+logger = logging.getLogger(__name__)
+# discord.pyのログ出力フォーマットを再現
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)-8s %(name)s %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 # 時間フォーマット
 TIME_FORMAT: str = "%H:%M:%S"
@@ -36,22 +45,23 @@ def m2ts_to_mp4(input_args: InputArgs) -> None:
             切り抜き開始時間
         leave_time_to: str
             切り抜き終了時間
-
-    Examples
-    --------
-    >>> python src/m2ts_to_mp4.py 'file/to/absolute/path/file_name.m2ts' 00:49:05 00:40:00 00:39:30
-    """  # noqa: E501
+    """
+    msg = f"[処理開始] {m2ts_to_mp4.__name__}"
+    logger.info(msg)
+    # 切り抜き開始時間と切り抜き所要時間を作成
     try:
-        # 動画の切り抜き開始時間
+        # 切り抜き開始時間
         start_time = datetime.strptime(  # noqa: DTZ007
             input_args.video_time, TIME_FORMAT
         ) - datetime.strptime(input_args.leave_time_from, TIME_FORMAT)  # noqa: DTZ007
 
+        # 切り抜き所要時間
         delta_time = datetime.strptime(  # noqa: DTZ007
             input_args.leave_time_from, TIME_FORMAT
         ) - datetime.strptime(input_args.leave_time_to, TIME_FORMAT)  # noqa: DTZ007
     except ValueError as e:
-        print(LOG_FORMAT, e)
+        msg = f"{LOG_FORMAT} {e}"
+        logger.info(msg)
         return
 
     input_path = Path(input_args.file_path)
@@ -73,8 +83,14 @@ def m2ts_to_mp4(input_args: InputArgs) -> None:
 
     try:
         ffmpeg.run(stream)
+
     except ffmpeg._run.Error as e:  # noqa: SLF001
-        print(LOG_FORMAT, e)
+        msg = f"{LOG_FORMAT} {e}"
+        logger.info(msg)
+
+    finally:
+        msg = f"[処理終了] {m2ts_to_mp4.__name__}"
+        logger.info(msg)
 
 
 if __name__ == "__main__":
