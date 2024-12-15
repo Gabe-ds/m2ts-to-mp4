@@ -40,7 +40,7 @@
 
     ※1: VLCのタイムラインで確認できる残り時間
 
-    ![time]("docs/assets/time.drawio.png")
+    ![time](docs/assets/time.drawio.png)
 
     ```shell
     python src/m2ts_to_mp4.py {録画ファイルの絶対パス} {録画ファイルの時間} {切り抜き開始時間} {切り抜き終了時間}
